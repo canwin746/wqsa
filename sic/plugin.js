@@ -43,9 +43,11 @@ async function search(query, page, type) {
                 const artist = decodeHtml(item.artist || item.singer || '').trim();
                 const song = {
                     id: String(item.rid),
+                    title: name || '未知歌曲',
                     name: name || '未知歌曲',
                     artist: artist || '未知歌手',
                     album: artist,
+                    artwork: item.pic || '',
                     img: item.pic || '',
                     rid: String(item.rid)
                 };
@@ -97,10 +99,12 @@ async function getMediaSource(musicItem, quality) {
             // 关键：强制返回完整字段，防止被 MusicFree 覆盖为“未命名”
             return {
                 url: url,
-                name: effectiveItem.name,
+                title: effectiveItem.title || effectiveItem.name,
+                name: effectiveItem.name || effectiveItem.title,
                 artist: effectiveItem.artist,
                 album: effectiveItem.album,
-                img: effectiveItem.img,
+                artwork: effectiveItem.artwork || effectiveItem.img,
+                img: effectiveItem.img || effectiveItem.artwork,
                 id: effectiveItem.id
             };
         }
@@ -110,9 +114,13 @@ async function getMediaSource(musicItem, quality) {
 
 async function getLyric(musicItem) {
     try {
+        const id = String(musicItem.id || musicItem.rid);
+        const cached = searchCache.get(id);
+        const effectiveItem = cached || musicItem;
+
         const response = await axios.get(`${API_BASE}/api/kw.php`, {
             params: {
-                rid: musicItem.id || musicItem.rid,
+                rid: effectiveItem.rid || effectiveItem.id,
                 type: 'json',
                 lrc: 'true'
             },
@@ -160,9 +168,11 @@ async function getTopList() {
                 const artist = decodeHtml(item.artist || item.singer || '').trim();
                 const song = {
                     id: String(item.rid),
+                    title: name || '未知歌曲',
                     name: name || '未知歌曲',
                     artist: artist || '未知歌手',
                     album: artist,
+                    artwork: item.pic || '',
                     img: item.pic || '',
                     rid: String(item.rid)
                 };
@@ -186,7 +196,7 @@ async function getTopListDetail(topListItem) {
 module.exports = {
     platform: '米兔音乐 (qqmp3.vip)',
     author: 'Junie',
-    version: '0.1.3',
+    version: '0.1.4',
     srcUrl: 'https://www.qqmp3.vip',
     primaryKey: ['id'],
     cacheControl: 'no-cache',
