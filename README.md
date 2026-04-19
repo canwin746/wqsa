@@ -1,1 +1,1 @@
-米兔音乐的musicfree插件
+用junie写的米兔音乐的musicfree插件
