@@ -135,13 +135,17 @@ async function getLyric(musicItem) {
             lrc = resData.lrc;
         } else if (resData.lyric) {
             lrc = resData.lyric;
+        } else if (resData.content) {
+            lrc = resData.content;
         } else if (resData.data) {
-            if (typeof resData.data === 'string' && resData.data.includes('[')) {
+            if (typeof resData.data === 'string' && (resData.data.includes('[') || resData.data.length > 50)) {
                 lrc = resData.data;
             } else if (resData.data.lrc) {
                 lrc = resData.data.lrc;
             } else if (resData.data.lyric) {
                 lrc = resData.data.lyric;
+            } else if (resData.data.content) {
+                lrc = resData.data.content;
             }
         }
 
@@ -149,10 +153,12 @@ async function getLyric(musicItem) {
             // 处理转义换行符 \\n 和标准换行符 \n
             lrc = lrc.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
             lrc = decodeHtml(lrc).trim();
-            return { lyric: lrc };
+            return { lyric: lrc, rawLrc: lrc };
         }
-    } catch (e) {}
-    return { lyric: '' };
+    } catch (e) {
+        console.log('getLyric error:', e);
+    }
+    return { lyric: '', rawLrc: '' };
 }
 
 async function getTopList() {
